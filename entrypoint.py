@@ -29,4 +29,12 @@ def record_engine_temperature():
 
 @app.route('/collect', methods=['POST'])
 def collect_engine_temperature():
-    return {"success": True}, 200
+    customer = redis.Redis(host="redis", port=6379, db=0, decode_responses=True)
+    values = customer.lrange(DATA_KEY, 0, -1)
+    values = [float(value) for value in values]
+    avarage = sum(values) / len(values)
+    return_val = {
+        "current_engine_temperature": values[0],
+        "average_engine_temperature": avarage,
+    }
+    return jsonify(return_val)
